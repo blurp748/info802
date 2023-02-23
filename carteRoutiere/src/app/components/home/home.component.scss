@@ -1,0 +1,14 @@
+.main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.article {
+    height: 80vh;
+    width: 80vw;
+    border-radius: 20px;
+    background-color: grey;
+}
