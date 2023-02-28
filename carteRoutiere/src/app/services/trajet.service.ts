@@ -32,6 +32,21 @@ export class TrajetService {
         )
     }
 
+    getBornes(city : string): Observable<any> {
+
+        return this.httpClient.get<any>("https://odre.opendatasoft.com/api/records/1.0/search/?dataset=bornes-irve&q=" + city)
+        .pipe(
+          catchError(this.errorHandler)
+        )
+    }
+
+    getCityLatAndLong(city : string): Observable<any> {
+        return this.httpClient.get<any>("https://nominatim.openstreetmap.org/search?q="+ city +"&format=json")
+        .pipe(
+          catchError(this.errorHandler)
+        )
+    }
+
     errorHandler(error: { error: { message: string; }; status: any; message: any; }) {
         let errorMessage = '';
         if(error.error instanceof ErrorEvent) {
