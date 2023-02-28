@@ -1,10 +1,11 @@
 <div class="main">
     <div class="article">
-        <form #searchForm= "ngForm" (ngSubmit)="onSubmitForm(searchForm)">
-            <input [(ngModel)]="brand" type="text" id="brand" name="brand" placeholder="Marque de voiture" required>
-            <input [(ngModel)]="start" type="text" id="start" name="start" placeholder="Départ" required>
-            <input [(ngModel)]="finish" type="text" id="finish" name="finish" placeholder="Arrivée" required>
+        <form class="form" #searchForm= "ngForm" (ngSubmit)="onSubmitForm(searchForm)">
+            <input class="field" [(ngModel)]="brand" type="text" id="brand" name="brand" placeholder="Marque de voiture" required>
+            <input class="field" [(ngModel)]="start" type="text" id="start" name="start" placeholder="Départ" required>
+            <input class="field" [(ngModel)]="finish" type="text" id="finish" name="finish" placeholder="Arrivée" required>
             <button type="submit" class="search">Rechercher</button>
         </form>
+        <app-map class="map"></app-map>
     </div>
 </div>
