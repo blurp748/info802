@@ -1,7 +1,10 @@
 <div class="main">
     <div class="article">
         <form class="form" #searchForm= "ngForm" (ngSubmit)="onSubmitForm(searchForm)">
-            <input class="field" [(ngModel)]="brand" type="text" id="brand" name="brand" placeholder="Marque de voiture" required>
+            <input list="brands" class="field" [(ngModel)]="brand" type="text" id="brand" name="brand" placeholder="Marque de voiture" required>
+            <datalist id="brands">
+                <option *ngFor="let tmpBrand of brandOptions;" value="{{ tmpBrand }}">{{ tmpBrand }}</option>
+            </datalist>
             <input class="field" [(ngModel)]="start" type="text" id="start" name="start" placeholder="Départ" required>
             <input class="field" [(ngModel)]="finish" type="text" id="finish" name="finish" placeholder="Arrivée" required>
             <button type="submit" class="search">Rechercher</button>

@@ -56,6 +56,62 @@ export class MapComponent implements AfterViewInit {
   }
   
   addTrajet(latStart : number, longStart : number, latEnd : number, longEnd : number) {
+
+    this.controlInit(latStart, longStart, latEnd, longEnd);
+
+    var waypoints: L.LatLng[] = [
+      L.latLng(latStart, longStart),
+      L.latLng(latEnd, longEnd)
+    ]
+
+    var middleWaypoints: L.LatLng[] = [];
+
+    var settingBornes = false;
+    this.control.on('routesfound', (e) => {
+      if(!settingBornes){
+        var route = e.routes[0];
+        var summary = route.summary;
+        var distance = summary.totalDistance;
+        console.log("Distance : " + distance);
+        var vitesse_moyenne = 110;
+        var autonomie = 200000;
+        var coordinates = route.coordinates;
+        var maxInd = route.waypointIndices[1];
+        var metersPercoordinates = distance / maxInd;
+        var coordinatesPointInd = (autonomie - 20000) / metersPercoordinates;
+
+        if (autonomie < distance){
+          for( var i = 0; (i*coordinatesPointInd) < maxInd; i++) {
+            console.log(i*coordinatesPointInd);
+            if ( i != 0) {
+              var needToStop = coordinates[Math.ceil(i*coordinatesPointInd)];
+              
+              this.trajetService.getBornesByLatLong(needToStop.lat,needToStop.lng).subscribe(data =>{
+                var borneCoordinates = data.records[0].geometry.coordinates;
+                middleWaypoints.push(L.latLng(borneCoordinates[1],borneCoordinates[0]));
+                var waypointsRes: L.LatLng[] = [];
+                waypointsRes.push(waypoints[0]);
+                middleWaypoints.forEach(data => {
+                  waypointsRes.push(data);
+                })
+                waypointsRes.push(waypoints[1]);
+                this.control.setWaypoints(waypointsRes);
+              });
+            }
+          };
+        }
+      
+        this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
+        settingBornes = true;
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+      this.initMap();
+  }
+
+  controlInit(latStart : number, longStart : number, latEnd : number, longEnd : number): void {
     if (this.control) this.map.removeControl(this.control);
     this.control = L.Routing.control({
         router: L.Routing.osrmv1({
@@ -63,49 +119,30 @@ export class MapComponent implements AfterViewInit {
         }),
         fitSelectedRoutes: false,
         show: false,
-        routeWhileDragging: true,
+        routeWhileDragging: false,
         waypoints: [
             L.latLng(latStart, longStart),
             L.latLng(latEnd, longEnd)
         ]
     });
-
-    this.control.on('routesfound', (e) => {
-        var routes = e.routes;
-        console.log(routes[0]);
-        var summary = routes[0].summary;
-        var distanceKm = summary.totalDistance / 1000;
-        var vitesse_moyenne = 110;
-        this.trajetService.search( distanceKm , vitesse_moyenne ).subscribe(data => {
-          let res = data.split("temps_trajetResult");
-          res = res[1];
-          res = res.replace(">","");
-          res = res.replace("</tns:","");
-          let timesH;
-          let timesMn = Math.ceil(res * 60);
-          if (timesMn > 60) {
-            timesH = Math.floor(timesMn / 60);
-            timesMn = timesMn - (timesH * 60);
-          }
-          if(timesH){
-            console.log(timesH + "h " + timesMn + "mn");
-          }else{
-            console.log(timesMn + "mn");
-          }
-        });
-    });
-
     this.control.addTo(this.map);
   }
 
-  ngAfterViewInit(): void {
-      this.initMap();
-      this.trajetService.getBornes("Bourget-du-Lac").subscribe(data =>{
-        data.records.forEach((element : any) => {
-          var marker = L.marker([element.geometry.coordinates[1],element.geometry.coordinates[0]], {icon: iconRecharge});
-          marker.addTo(this.map);
-        });
-      });
+  calculTemps(distance : number, vitesse_moyenne : number, points: number) {
+    this.trajetService.search( distance / 1000 , vitesse_moyenne ).subscribe(data => {
+      let res = data.split("temps_trajetResult");
+      res = res[1];
+      res = res.replace(">","");
+      res = res.replace("</tns:","");
+      let timesMn = Math.ceil(res * 60);
+      if (timesMn > 60) {
+        let timesH = Math.floor(timesMn / 60);
+        timesMn = timesMn - (timesH * 60);
+        console.log(timesH + "h " + timesMn + "mn");
+      }else{
+        console.log(timesMn + "mn");
+      }
+    });
   }
 
 }

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { concat } from 'rxjs';
 import { TrajetService } from 'src/app/services/trajet.service';
@@ -9,45 +9,70 @@ import { MapComponent } from '../map/map.component';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
 
   brand!: String;
   start!: String;
   finish!: String;
+  brandOptions!: String[];
+  brandIds!: String[];
   @ViewChild('myMap')
   private mapComponent !: MapComponent;
 
   constructor(private trajetService : TrajetService) {}
   
+  ngOnInit(): void {
+    this.brandOptions = [];
+    this.brandIds = [];
+    this.trajetService.getElectricVehicules().subscribe((data) => {
+      console.log(data);
+      data.data.vehicleList.forEach((vehicule : any) => {
+        var tmp = vehicule.naming.model + " : " + vehicule.naming.make;
+        if(!this.brandOptions.includes(tmp)){
+          this.brandOptions.push(tmp);
+          this.brandIds.push(vehicule.id);
+        }
+      });
+    })
+  }
+
   onSubmitForm(form: NgForm) {
 
+    var brandId = this.brandIds[this.brandOptions.indexOf(form.value.brand)];
     var latStart = 0.0;
     var longStart = 0.0;
     var latEnd = 0.0;
     var longEnd = 0.0;
 
-    const result = concat(
-      this.trajetService.getCityLatAndLong(form.value.start),
-      this.trajetService.getCityLatAndLong(form.value.finish)
-    );
+    console.log(brandId);
 
-    var i = 0;
-    result.subscribe({
-      next(value) {
-          console.log(value);
-          if (i == 0){
-            latStart = value[0].lat;
-            longStart = value[0].lon;
-            i++;
-          }else{
-            latEnd = value[0].lat;
-            longEnd = value[0].lon;
-          }
-      },
-      complete : () => {
-        this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd);
-      },
-    })
+    if (form.value.start && form.value.finish && form.value.brand){
+      const result = concat(
+        this.trajetService.getCityLatAndLong(form.value.start),
+        this.trajetService.getCityLatAndLong(form.value.finish),
+        this.trajetService.getElectricVehicule(brandId)
+      );
+  
+      var i = 0;
+      result.subscribe({
+        next(value) {
+            if (i == 0){
+              latStart = value[0].lat;
+              longStart = value[0].lon;
+              i++;
+            }else if (i == 1){
+              latEnd = value[0].lat;
+              longEnd = value[0].lon;
+              i++
+            }else{
+              console.log(value);
+            }
+        },
+        complete : () => {
+          this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd);
+        },
+      })
+    }
   }
   
 }
