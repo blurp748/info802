@@ -1,14 +1,26 @@
 <div class="main">
     <div class="article">
-        <form class="form" #searchForm= "ngForm" (ngSubmit)="onSubmitForm(searchForm)">
-            <input list="brands" class="field" [(ngModel)]="brand" type="text" id="brand" name="brand" placeholder="Marque de voiture" required>
-            <datalist id="brands">
-                <option *ngFor="let tmpBrand of brandOptions;" value="{{ tmpBrand }}">{{ tmpBrand }}</option>
-            </datalist>
-            <input class="field" [(ngModel)]="start" type="text" id="start" name="start" placeholder="Départ" required>
-            <input class="field" [(ngModel)]="finish" type="text" id="finish" name="finish" placeholder="Arrivée" required>
-            <button type="submit" class="search">Rechercher</button>
-        </form>
+        <div class="infos">
+            <form class="form" #searchForm= "ngForm" (ngSubmit)="onSubmitForm(searchForm)">
+                <input list="brands" class="field" [(ngModel)]="brand" type="text" id="brand" name="brand" placeholder="Marque de voiture" required>
+                <datalist id="brands">
+                    <option *ngFor="let tmpBrand of brandOptions;" value="{{ tmpBrand }}">{{ tmpBrand }}</option>
+                </datalist>
+                <input class="field" [(ngModel)]="start" type="text" id="start" name="start" placeholder="Départ" required>
+                <input class="field" [(ngModel)]="finish" type="text" id="finish" name="finish" placeholder="Arrivée" required>
+                <button type="submit" class="search">Rechercher</button>
+            </form>
+            <div *ngIf="myMap.distance" class="props-box">
+                <p class="propsField">Distance</p>
+                <div class="props" *ngIf="myMap.distance">{{ myMap.distance }}km</div>
+                <p class="propsField">Autonomie</p>
+                <div class="props" *ngIf="myMap.autonomie">{{ myMap.autonomie }}km</div>
+                <p class="propsField">Temps</p>
+                <div class="props" *ngIf="myMap.temps">{{ myMap.temps }}</div>
+                <p class="propsField">Coût</p>
+                <div class="props" *ngIf="myMap.cost">{{ myMap.cost }}€</div>
+            </div>
+        </div>
         <app-map #myMap class="map"></app-map>
     </div>
 </div>

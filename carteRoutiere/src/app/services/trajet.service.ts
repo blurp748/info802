@@ -1,3 +1,4 @@
+import { query } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { gql, Apollo } from 'apollo-angular';
@@ -12,6 +13,7 @@ import { catchError } from 'rxjs/internal/operators/catchError';
 export class TrajetService {
 
     soapTrajetURL : string = 'http://localhost:8000';
+    restCostURL : string = 'http://localhost:3000';
 
     constructor(private httpClient: HttpClient, private apollo: Apollo) { }
     
@@ -32,6 +34,18 @@ export class TrajetService {
           catchError(this.errorHandler)
         )
     }
+
+    getCost(distance : number): Observable<any> {
+
+      var request = {
+        distance: distance
+      }
+
+      return this.httpClient.post<any>(this.restCostURL + "/cost", request)
+      .pipe(
+        catchError(this.errorHandler)
+      )
+  }
 
     getBornes(city : string): Observable<any> {
 
@@ -57,62 +71,69 @@ export class TrajetService {
     }
 
     getElectricVehicules(): Observable<any> {
-      return this.apollo.watchQuery({
-        query: gql`
-        {
-          vehicleList(
-            size: 870
-          ) {
-            id
-            naming {
-              make
-              model
-            }
+
+      let getVehicules = gql`
+      {
+        vehicleList(
+          size: 870
+        ) {
+          id
+          naming {
+            make
+            model
           }
         }
-        `
-      }).valueChanges;
+      }
+      `;
+
+      return this.apollo.watchQuery({ query: getVehicules }).valueChanges;
     }
 
     getElectricVehicule(id: String): Observable<any> {
-      return this.apollo.watchQuery({
-        query: gql`
-        {
-          vehicleList(
-            search : "638157687592b0f2c57fc08f"
-          ) {
-            id
-            naming {
-              make
-              model
-              chargetrip_version
+
+      let getVehiculeById = gql`
+      query getVehiculeById($idVehicule: String!) {
+        vehicleList(
+          search : $idVehicule
+        ) {
+          id
+          naming {
+            make
+            model
+            chargetrip_version
+          }
+          media {
+            image {
+              url
             }
-            media {
-              image {
-                url
-              }
-              brand {
-                thumbnail_url
-              }
-            }
-            range {
-              chargetrip_range {
-                best
-                worst
-              }
-            }
-            battery {
-              usable_kwh
-            }
-            routing {
-              fast_charging_support
-            }
-            connectors {
-              standard
+            brand {
+              thumbnail_url
             }
           }
+          range {
+            chargetrip_range {
+              best
+              worst
+            }
+          }
+          battery {
+            usable_kwh
+          }
+          routing {
+            fast_charging_support
+          }
+          connectors {
+            standard
+          }
         }
-        `
+      }
+      `;
+
+      return this.apollo.watchQuery({ 
+        query: getVehiculeById,
+        variables: {
+          idVehicule: id
+        }
       }).valueChanges;
     }
 

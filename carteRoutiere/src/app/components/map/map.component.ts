@@ -37,13 +37,17 @@ export class MapComponent implements AfterViewInit {
 
   map!: L.Map;
   control !: L.Routing.Control;
+  distance !: number;
+  autonomie !: number;
+  temps !: string;
+  cost !: string;
 
   constructor(private trajetService : TrajetService) {}
 
   private initMap(): void {
     this.map = L.map('map', {
       center: [ 45.607101, 5.8874 ],
-      zoom: 15
+      zoom: 3
     });
 
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -55,9 +59,9 @@ export class MapComponent implements AfterViewInit {
     tiles.addTo(this.map);
   }
   
-  addTrajet(latStart : number, longStart : number, latEnd : number, longEnd : number) {
-
+  addTrajet(latStart : number, longStart : number, latEnd : number, longEnd : number, autonomie : number) {
     this.controlInit(latStart, longStart, latEnd, longEnd);
+    this.map.flyTo(new L.LatLng(latStart,longStart), 6);
 
     var waypoints: L.LatLng[] = [
       L.latLng(latStart, longStart),
@@ -70,19 +74,22 @@ export class MapComponent implements AfterViewInit {
     this.control.on('routesfound', (e) => {
       if(!settingBornes){
         var route = e.routes[0];
-        var summary = route.summary;
-        var distance = summary.totalDistance;
-        console.log("Distance : " + distance);
+        var distance = route.summary.totalDistance;
         var vitesse_moyenne = 110;
-        var autonomie = 200000;
         var coordinates = route.coordinates;
         var maxInd = route.waypointIndices[1];
         var metersPercoordinates = distance / maxInd;
         var coordinatesPointInd = (autonomie - 20000) / metersPercoordinates;
 
+        console.log("Distance : " + distance);
+        this.distance = Math.floor(distance / 1000);
+        console.log("Autonomie : " + autonomie);
+        this.autonomie = Math.floor(autonomie/1000);
+
+        this.control.createAlternativesContainer();
+
         if (autonomie < distance){
           for( var i = 0; (i*coordinatesPointInd) < maxInd; i++) {
-            console.log(i*coordinatesPointInd);
             if ( i != 0) {
               var needToStop = coordinates[Math.ceil(i*coordinatesPointInd)];
               
@@ -102,6 +109,7 @@ export class MapComponent implements AfterViewInit {
         }
       
         this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
+        this.calculCost(distance / 1000);
         settingBornes = true;
       }
     });
@@ -118,12 +126,12 @@ export class MapComponent implements AfterViewInit {
             serviceUrl: `http://router.project-osrm.org/route/v1/`
         }),
         fitSelectedRoutes: false,
-        show: false,
         routeWhileDragging: false,
+        show: false,
         waypoints: [
             L.latLng(latStart, longStart),
             L.latLng(latEnd, longEnd)
-        ]
+        ],
     });
     this.control.addTo(this.map);
   }
@@ -138,11 +146,17 @@ export class MapComponent implements AfterViewInit {
       if (timesMn > 60) {
         let timesH = Math.floor(timesMn / 60);
         timesMn = timesMn - (timesH * 60);
-        console.log(timesH + "h " + timesMn + "mn");
+        this.temps = timesH + "h " + timesMn + "mn";
       }else{
-        console.log(timesMn + "mn");
+        this.temps = timesMn + "mn";
       }
     });
+  }
+
+  calculCost(distance: number) {
+    this.trajetService.getCost(distance).subscribe(data => {
+      this.cost = (Math.round(data.cost * 100) / 100).toFixed(2)
+    })
   }
 
 }

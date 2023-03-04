@@ -14,13 +14,43 @@
     display: flex;
 }
 
+.infos {
+    width: 25%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
 .form {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    width: 25%;
-    height: 100%;
+    width: 100%;
+}
+
+.props-box { 
+    color: white;
+    width: 90%;
+    border-radius: 20px;
+    background: black;
+    margin-top: 20px;
+}
+
+.props {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.propsField {
+    margin-left: 5px;
 }
 
 .map {

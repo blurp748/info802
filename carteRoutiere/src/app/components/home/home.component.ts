@@ -25,7 +25,6 @@ export class HomeComponent implements OnInit {
     this.brandOptions = [];
     this.brandIds = [];
     this.trajetService.getElectricVehicules().subscribe((data) => {
-      console.log(data);
       data.data.vehicleList.forEach((vehicule : any) => {
         var tmp = vehicule.naming.model + " : " + vehicule.naming.make;
         if(!this.brandOptions.includes(tmp)){
@@ -37,14 +36,12 @@ export class HomeComponent implements OnInit {
   }
 
   onSubmitForm(form: NgForm) {
-
     var brandId = this.brandIds[this.brandOptions.indexOf(form.value.brand)];
     var latStart = 0.0;
     var longStart = 0.0;
     var latEnd = 0.0;
     var longEnd = 0.0;
-
-    console.log(brandId);
+    var autonomie = 0;
 
     if (form.value.start && form.value.finish && form.value.brand){
       const result = concat(
@@ -55,7 +52,7 @@ export class HomeComponent implements OnInit {
   
       var i = 0;
       result.subscribe({
-        next(value) {
+        next: (value) => {
             if (i == 0){
               latStart = value[0].lat;
               longStart = value[0].lon;
@@ -66,10 +63,17 @@ export class HomeComponent implements OnInit {
               i++
             }else{
               console.log(value);
+              var range = value.data.vehicleList[0].range.chargetrip_range;
+              autonomie = Math.ceil(( range.best + range.worst ) / 2);
+              this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd,autonomie*1000);
             }
         },
+        error(error) {
+          console.log(error);
+        },
         complete : () => {
-          this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd);
+          console.log("TODO : complete not called ?");
+          //this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd,autonomie*1000);
         },
       })
     }
