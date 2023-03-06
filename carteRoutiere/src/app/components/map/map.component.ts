@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import * as L from 'leaflet';
 import { TrajetService } from 'src/app/services/trajet.service';
 import 'leaflet-routing-machine';
@@ -41,8 +41,9 @@ export class MapComponent implements AfterViewInit {
   autonomie !: number;
   temps !: string;
   cost !: string;
+  @ViewChild('map') mapElement: ElementRef<HTMLDivElement> | undefined;
 
-  constructor(private trajetService : TrajetService) {}
+  constructor(private trajetService : TrajetService, private renderer : Renderer2) {}
 
   private initMap(): void {
     this.map = L.map('map', {
@@ -81,9 +82,7 @@ export class MapComponent implements AfterViewInit {
         var metersPercoordinates = distance / maxInd;
         var coordinatesPointInd = (autonomie - 20000) / metersPercoordinates;
 
-        console.log("Distance : " + distance);
         this.distance = Math.floor(distance / 1000);
-        console.log("Autonomie : " + autonomie);
         this.autonomie = Math.floor(autonomie/1000);
 
         this.control.createAlternativesContainer();
@@ -93,25 +92,37 @@ export class MapComponent implements AfterViewInit {
             if ( i != 0) {
               var needToStop = coordinates[Math.ceil(i*coordinatesPointInd)];
               
-              this.trajetService.getBornesByLatLong(needToStop.lat,needToStop.lng).subscribe(data =>{
-                var borneCoordinates = data.records[0].geometry.coordinates;
-                middleWaypoints.push(L.latLng(borneCoordinates[1],borneCoordinates[0]));
-                var waypointsRes: L.LatLng[] = [];
-                waypointsRes.push(waypoints[0]);
-                middleWaypoints.forEach(data => {
-                  waypointsRes.push(data);
-                })
-                waypointsRes.push(waypoints[1]);
-                this.control.setWaypoints(waypointsRes);
+              this.trajetService.getBornesByLatLong(needToStop.lat,needToStop.lng,20000).subscribe(data =>{
+                if(data.records.length != 0) {
+                  var borneCoordinates = data.records[0].geometry.coordinates;
+                  middleWaypoints.push(L.latLng(borneCoordinates[1],borneCoordinates[0]));
+                  var waypointsRes: L.LatLng[] = [];
+                  waypointsRes.push(waypoints[0]);
+                  middleWaypoints.forEach(data => {
+                    waypointsRes.push(data);
+                  })
+                  waypointsRes.push(waypoints[1]);
+                  this.control.setWaypoints(waypointsRes);
+                }
               });
             }
           };
+        
         }
       
         this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
         this.calculCost(distance / 1000);
         settingBornes = true;
       }
+
+      var childs = this.mapElement?.nativeElement.childNodes[0].childNodes[3].childNodes;
+      console.log(childs);
+      if(childs != undefined && childs.length > 2){
+        for( var i = 1; i< childs.length -1; i++){
+          this.renderer.setStyle(childs[i], "content", 'url("assets/images/recharge.png")');
+        } 
+      }
+
     });
   }
 

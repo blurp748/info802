@@ -1,4 +1,3 @@
-import { query } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { gql, Apollo } from 'apollo-angular';
@@ -14,6 +13,8 @@ export class TrajetService {
 
     soapTrajetURL : string = 'http://localhost:8000';
     restCostURL : string = 'http://localhost:3000';
+    nominatimURL : string = "https://nominatim.openstreetmap.org";
+    borneURL : string = "https://odre.opendatasoft.com/api";
 
     constructor(private httpClient: HttpClient, private apollo: Apollo) { }
     
@@ -48,23 +49,21 @@ export class TrajetService {
   }
 
     getBornes(city : string): Observable<any> {
-
-        return this.httpClient.get<any>("https://odre.opendatasoft.com/api/records/1.0/search/?dataset=bornes-irve&q=" + city)
+        return this.httpClient.get<any>(this.borneURL + "/records/1.0/search/?dataset=bornes-irve&q=" + city)
         .pipe(
           catchError(this.errorHandler)
         )
     }
 
-    getBornesByLatLong(lat : number, long : number): Observable<any> {
-
-      return this.httpClient.get<any>("https://odre.opendatasoft.com/api/records/1.0/search/?dataset=bornes-irve&q=&rows=1&geofilter.distance="+ lat +"%2C"+ long +"%2C" + 20000)
+    getBornesByLatLong(lat : number, long : number, metersRadius : number): Observable<any> {
+      return this.httpClient.get<any>(this.borneURL + "/records/1.0/search/?dataset=bornes-irve&q=&rows=1&geofilter.distance="+ lat +"%2C"+ long +"%2C" + metersRadius)
       .pipe(
         catchError(this.errorHandler)
       )
     }
 
     getCityLatAndLong(city : string): Observable<any> {
-        return this.httpClient.get<any>("https://nominatim.openstreetmap.org/search?q="+ city +"&format=json")
+        return this.httpClient.get<any>(this.nominatimURL + "/search?q="+ city +"&format=json")
         .pipe(
           catchError(this.errorHandler)
         )
