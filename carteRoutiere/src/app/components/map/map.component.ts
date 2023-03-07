@@ -60,7 +60,7 @@ export class MapComponent implements AfterViewInit {
     tiles.addTo(this.map);
   }
   
-  addTrajet(latStart : number, longStart : number, latEnd : number, longEnd : number, autonomie : number) {
+  addTrajet(latStart : number, longStart : number, latEnd : number, longEnd : number, autonomie : number, fast_charging : boolean) {
     this.controlInit(latStart, longStart, latEnd, longEnd);
     this.map.flyTo(new L.LatLng(latStart,longStart), 6);
 
@@ -103,14 +103,14 @@ export class MapComponent implements AfterViewInit {
                   })
                   waypointsRes.push(waypoints[1]);
                   this.control.setWaypoints(waypointsRes);
-                  this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
+                  this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length, fast_charging);
                 }
               });
             }
           };
         
         }else {
-          this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
+          this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length, fast_charging);
         }
 
         this.calculCost(distance / 1000);
@@ -148,14 +148,14 @@ export class MapComponent implements AfterViewInit {
     this.control.addTo(this.map);
   }
 
-  calculTemps(distance : number, vitesse_moyenne : number, points: number) {
-    this.trajetService.search( distance / 1000 , vitesse_moyenne, points ).subscribe((data: any) => {
+  calculTemps(distance : number, vitesse_moyenne : number, points: number, fast_charging : boolean) {
+    this.trajetService.search( distance / 1000 , vitesse_moyenne, points, fast_charging ).subscribe((data: any) => {
       let res = data.split("temps_trajetResult");
       res = res[1];
       res = res.replace(">","");
       res = res.replace("</tns:","");
-      let hours = Math.ceil(res);
-      let mn = (res - hours) * 60;
+      let hours = Math.floor(res / 60);
+      let mn = Math.floor(res - (60*hours));
       let timesMn = Math.ceil(hours * 60 + mn);
       if (timesMn > 60) {
         let timesH = Math.floor(timesMn / 60);

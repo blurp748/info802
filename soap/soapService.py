@@ -1,5 +1,5 @@
 from spyne import Application, rpc, ServiceBase, \
-    Integer, Unicode , Decimal
+    Integer, Unicode , Decimal, Boolean
 from spyne import Iterable
 from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
@@ -13,10 +13,14 @@ class HelloWorldService(ServiceBase):
         for i in range(times):
             yield u'Hello, %s' % name
 
-    @rpc(Decimal, Decimal, Decimal, _returns=Decimal)
-    def temps_trajet(ctx, distance, vitesse_moyenne, points):
+    @rpc(Decimal, Decimal, Decimal, Boolean, _returns=Decimal)
+    def temps_trajet(ctx, distance, vitesse_moyenne, points, fast_charging):
         ctx.transport.resp_headers['Access-Control-Allow-Origin'] = '*'
-        return (distance / vitesse_moyenne + points)
+        res = distance / vitesse_moyenne * 60
+        temps = 60
+        if fast_charging:
+            temps = 30 
+        return res + (points * 30)
 
 application = Application([HelloWorldService], 'spyne.examples.hello.soap',
         in_protocol=Soap11(validator='lxml'),

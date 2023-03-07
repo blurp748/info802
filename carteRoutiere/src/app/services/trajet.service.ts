@@ -18,7 +18,7 @@ export class TrajetService {
 
     constructor(private httpClient: HttpClient, private apollo: Apollo) { }
     
-    search(distance : number, vitesse_moyenne : number, points : number): Observable<any> {
+    search(distance : number, vitesse_moyenne : number, points : number, fast_charging : boolean): Observable<any> {
         var request: string = 
         "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:spy='spyne.examples.hello.soap'>"
         + "<soapenv:Header/>"
@@ -27,6 +27,7 @@ export class TrajetService {
         +     "<spy:distance>" + distance + "</spy:distance>"
         +     "<spy:vitesse_moyenne>"+ vitesse_moyenne +"</spy:vitesse_moyenne>"
         +     "<spy:points>"+ points +"</spy:points>"
+        +     "<spy:fast_charging>"+ fast_charging +"</spy:fast_charging>"
         +   "</spy:temps_trajet>"
         + "</soapenv:Body>"
         +"</soapenv:Envelope>";
@@ -102,28 +103,14 @@ export class TrajetService {
             model
             chargetrip_version
           }
-          media {
-            image {
-              url
-            }
-            brand {
-              thumbnail_url
-            }
-          }
           range {
             chargetrip_range {
               best
               worst
             }
           }
-          battery {
-            usable_kwh
-          }
           routing {
             fast_charging_support
-          }
-          connectors {
-            standard
           }
         }
       }

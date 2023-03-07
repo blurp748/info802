@@ -64,7 +64,8 @@ export class HomeComponent implements OnInit {
             }else{
               var range = value.data.vehicleList[0].range.chargetrip_range;
               autonomie = Math.ceil(( range.best + range.worst ) / 2);
-              this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd,autonomie*1000);
+              var fast_charging = value.data.vehicleList[0].routing.fast_charging_support;
+              this.mapComponent.addTrajet(latStart,longStart,latEnd,longEnd,autonomie*1000, fast_charging);
             }
         },
         error(error) {
