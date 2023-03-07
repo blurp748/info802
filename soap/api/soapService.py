@@ -27,6 +27,6 @@ application = Application([HelloWorldService], 'spyne.examples.hello.soap',
         out_protocol=Soap11())
 wsgi_application = WsgiApplication(application)
 
-
-server = make_server('localhost', 8000, wsgi_application)
-server.serve_forever()
+app = wsgi_application
+# server = make_server('localhost', 8000, wsgi_application)
+# server.serve_forever()
