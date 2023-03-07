@@ -12,7 +12,7 @@ import { catchError } from 'rxjs/internal/operators/catchError';
 export class TrajetService {
 
     soapTrajetURL : string = 'http://localhost:8000';
-    restCostURL : string = 'http://localhost:3000';
+    restCostURL : string = 'https://info802-rest.vercel.app';
     nominatimURL : string = "https://nominatim.openstreetmap.org";
     borneURL : string = "https://odre.opendatasoft.com/api";
 
