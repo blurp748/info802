@@ -4,6 +4,7 @@ import { gql, Apollo } from 'apollo-angular';
 import { Observable } from 'rxjs/internal/Observable';
 import { throwError } from 'rxjs/internal/observable/throwError';
 import { catchError } from 'rxjs/internal/operators/catchError';
+import { environment } from 'src/environment/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,8 @@ import { catchError } from 'rxjs/internal/operators/catchError';
 
 export class TrajetService {
 
-    soapTrajetURL : string = 'https://info802-soap.vercel.app';
-    restCostURL : string = 'https://info802-rest.vercel.app';
+    soapTrajetURL : string = environment.soapTrajetURL;
+    restCostURL : string = environment.restCostURL;
     nominatimURL : string = "https://nominatim.openstreetmap.org";
     borneURL : string = "https://odre.opendatasoft.com/api";
 
