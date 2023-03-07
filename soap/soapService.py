@@ -13,10 +13,10 @@ class HelloWorldService(ServiceBase):
         for i in range(times):
             yield u'Hello, %s' % name
 
-    @rpc(Decimal, Decimal, _returns=Decimal)
-    def temps_trajet(ctx, distance, vitesse_moyenne):
+    @rpc(Decimal, Decimal, Decimal, _returns=Decimal)
+    def temps_trajet(ctx, distance, vitesse_moyenne, points):
         ctx.transport.resp_headers['Access-Control-Allow-Origin'] = '*'
-        return (distance / vitesse_moyenne)
+        return (distance / vitesse_moyenne + points)
 
 application = Application([HelloWorldService], 'spyne.examples.hello.soap',
         in_protocol=Soap11(validator='lxml'),

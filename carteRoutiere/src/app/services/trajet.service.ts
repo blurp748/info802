@@ -18,7 +18,7 @@ export class TrajetService {
 
     constructor(private httpClient: HttpClient, private apollo: Apollo) { }
     
-    search(distance : number, vitesse_moyenne : number): Observable<any> {
+    search(distance : number, vitesse_moyenne : number, points : number): Observable<any> {
         var request: string = 
         "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:spy='spyne.examples.hello.soap'>"
         + "<soapenv:Header/>"
@@ -26,6 +26,7 @@ export class TrajetService {
         +   "<spy:temps_trajet>"
         +     "<spy:distance>" + distance + "</spy:distance>"
         +     "<spy:vitesse_moyenne>"+ vitesse_moyenne +"</spy:vitesse_moyenne>"
+        +     "<spy:points>"+ points +"</spy:points>"
         +   "</spy:temps_trajet>"
         + "</soapenv:Body>"
         +"</soapenv:Envelope>";

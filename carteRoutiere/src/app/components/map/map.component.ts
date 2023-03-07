@@ -103,20 +103,21 @@ export class MapComponent implements AfterViewInit {
                   })
                   waypointsRes.push(waypoints[1]);
                   this.control.setWaypoints(waypointsRes);
+                  this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
                 }
               });
             }
           };
         
+        }else {
+          this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
         }
-      
-        this.calculTemps(distance, vitesse_moyenne, middleWaypoints.length);
+
         this.calculCost(distance / 1000);
         settingBornes = true;
       }
 
       var childs = this.mapElement?.nativeElement.childNodes[0].childNodes[3].childNodes;
-      console.log(childs);
       if(childs != undefined && childs.length > 2){
         for( var i = 1; i< childs.length -1; i++){
           this.renderer.setStyle(childs[i], "content", 'url("assets/images/recharge.png")');
@@ -148,12 +149,14 @@ export class MapComponent implements AfterViewInit {
   }
 
   calculTemps(distance : number, vitesse_moyenne : number, points: number) {
-    this.trajetService.search( distance / 1000 , vitesse_moyenne ).subscribe(data => {
+    this.trajetService.search( distance / 1000 , vitesse_moyenne, points ).subscribe((data: any) => {
       let res = data.split("temps_trajetResult");
       res = res[1];
       res = res.replace(">","");
       res = res.replace("</tns:","");
-      let timesMn = Math.ceil(res * 60);
+      let hours = Math.ceil(res);
+      let mn = (res - hours) * 60;
+      let timesMn = Math.ceil(hours * 60 + mn);
       if (timesMn > 60) {
         let timesH = Math.floor(timesMn / 60);
         timesMn = timesMn - (timesH * 60);
