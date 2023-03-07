@@ -1,5 +1,5 @@
 export const environment = {
     production: false,
-    soapTrajetURL: 'http://localhost:8000',
-    restCostURL: 'http://localhost:3000'
+    soapTrajetURL: 'https://info802-soap.vercel.app',
+    restCostURL: 'https://info802-rest.vercel.app'
 };
