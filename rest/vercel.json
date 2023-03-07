@@ -5,6 +5,12 @@
         "src": "api/index.ts",
         "use": "@now/node"
       }
+    ],
+    "routes": [
+        {
+          "src": "/(.*)",
+          "dest": "api/index.ts"
+        }
     ]
   }
   
